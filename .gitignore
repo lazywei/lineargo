@@ -1,3 +1,0 @@
-*.o
-vendor/liblinear/predict
-vendor/liblinear/train
