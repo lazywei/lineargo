@@ -96,7 +96,43 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 	return featureNodes
 }
 
-// model* train(const struct problem *prob, const struct parameter *param);
+// Wrapper for the `train` function in liblinear.
+//
+// `model* train(const struct problem *prob, const struct parameter *param);`
+//
+// The explanation of parameters are:
+//
+// solverType:
+//
+//   for multi-class classification
+//          0 -- L2-regularized logistic regression (primal)
+//          1 -- L2-regularized L2-loss support vector classification (dual)
+//          2 -- L2-regularized L2-loss support vector classification (primal)
+//          3 -- L2-regularized L1-loss support vector classification (dual)
+//          4 -- support vector classification by Crammer and Singer
+//          5 -- L1-regularized L2-loss support vector classification
+//          6 -- L1-regularized logistic regression
+//          7 -- L2-regularized logistic regression (dual)
+//   for regression
+//         11 -- L2-regularized L2-loss support vector regression (primal)
+//         12 -- L2-regularized L2-loss support vector regression (dual)
+//         13 -- L2-regularized L1-loss support vector regression (dual)
+//
+// C_ is the cost of constraints violation.
+//
+// p is the sensitiveness of loss of support vector regression.
+// eps is the stopping criterion.
+//
+// nrWeight, weightLabel, and weight are used to change the penalty for some
+// classes (If the weight for a class is not changed, it is set to 1). This is
+// useful for training classifier using unbalanced input data or with asymmetric
+// misclassification cost.
+//
+// nrWeight is the number of elements in the array weightLabel and
+// weight. Each weight[i] corresponds to weightLabel[i], meaning that
+// the penalty of class weightLabel[i] is scaled by a factor of weight[i].
+//
+// If you do not want to change penalty for any of the classes, just set nrWeight to 0.
 func Train(X, y *mat64.Dense, bias float64, solverType int,
 	eps, C_ float64,
 	nrWeight int, weightLabel []int,
