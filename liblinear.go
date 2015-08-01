@@ -97,7 +97,7 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 }
 
 // struct model* train(const struct problem *prob, const struct parameter *param);
-func MyTrain(X, y *mat64.Dense, bias bool, solverType int,
+func Train(X, y *mat64.Dense, bias bool, solverType int,
 	eps, C_ float64,
 	nrWeight int, weightLabel []int,
 	weight []float64, p float64,

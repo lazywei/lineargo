@@ -21,7 +21,7 @@ var _ = Describe("Liblinear", func() {
 	Describe("Train", func() {
 		It("should return a feature node", func() {
 			X, y := mockingbird.ReadLibsvm("heart_scale", true)
-			MyTrain(X, y, true, 0, 0.01, 1.0, 0, nil, nil, 0.1)
+			Train(X, y, true, 0, 0.01, 1.0, 0, nil, nil, 0.1)
 		})
 	})
 })
