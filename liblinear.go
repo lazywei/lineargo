@@ -96,8 +96,8 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 	return featureNodes
 }
 
-// struct model* train(const struct problem *prob, const struct parameter *param);
-func Train(X, y *mat64.Dense, bias bool, solverType int,
+// model* train(const struct problem *prob, const struct parameter *param);
+func Train(X, y *mat64.Dense, bias float64, solverType int,
 	eps, C_ float64,
 	nrWeight int, weightLabel []int,
 	weight []float64, p float64,
@@ -111,23 +111,23 @@ func Train(X, y *mat64.Dense, bias bool, solverType int,
 	cX := toFeatureNodes(X)
 	problem.x = &cX[0]
 	problem.y = &cY[0]
-	problem.n = C.int(nRows)
-	problem.l = C.int(nCols)
-	problem.bias = C.double(-1)
+	problem.n = C.int(nCols)
+	problem.l = C.int(nRows)
+	problem.bias = C.double(bias)
 
-	parameter.solver_type = C.int(solverType)
+	parameter.solver_type = C.L2R_LR
 	parameter.eps = C.double(eps)
 	parameter.C = C.double(C_)
 	parameter.nr_weight = C.int(nrWeight)
 
 	if weightLabel != nil {
-		parameter.weight_label = mapCInt(weightLabel)
+		parameter.weight_label = &mapCInt(weightLabel)[0]
 	} else {
 		parameter.weight_label = nil
 	}
 
 	if weight != nil {
-		parameter.weight = mapCDouble(weight)
+		parameter.weight = &mapCDouble(weight)[0]
 	} else {
 		parameter.weight = nil
 	}
@@ -138,4 +138,31 @@ func Train(X, y *mat64.Dense, bias bool, solverType int,
 	return &Model{
 		cModel: model,
 	}
+}
+
+// double predict(const struct model *model_, const struct feature_node *x);
+func Predict(model *Model, X *mat64.Dense) *mat64.Dense {
+	nRows, _ := X.Dims()
+	cXs := toFeatureNodes(X)
+	y := mat64.NewDense(nRows, 1, nil)
+	for i, cX := range cXs {
+		y.Set(i, 0, float64(C.predict(model.cModel, cX)))
+	}
+	return y
+}
+
+func Accuracy(y_true, y_pred *mat64.Dense) float64 {
+	y1 := y_true.Col(nil, 0)
+	y2 := y_pred.Col(nil, 0)
+
+	total := 0.0
+	correct := 0.0
+
+	for i := 0; i < len(y1); i++ {
+		if y1[i] == y2[i] {
+			correct++
+		}
+		total++
+	}
+	return correct / total
 }
