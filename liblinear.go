@@ -3,13 +3,32 @@ package liblinear
 /*
 #cgo LDFLAGS: -llinear
 #include <linear.h>
+#include <stdio.h>
+
+void myPrint(struct feature_node x) {
+	printf("(%d, %f)\n", x.index, x.value);
+}
+
+struct model* goTrain(
+	const struct problem *prob,
+	const struct parameter *param) {
+
+	printf("\n");
+	printf("%f\n", prob->y[0]);
+	printf("%f\n", prob->y[1]);
+	printf("%f\n", prob->y[2]);
+	printf("%f\n", prob->y[3]);
+	printf("%f\n", prob->y[4]);
+	printf("%f\n", prob->y[5]);
+
+	return 0;
+}
+
+
 */
 import "C"
 
-import (
-	"github.com/davecgh/go-spew/spew"
-	"github.com/gonum/matrix/mat64"
-)
+import "github.com/gonum/matrix/mat64"
 
 type FeatureNode struct {
 	// struct feature_node
@@ -56,17 +75,22 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 	nRows, nCols := X.Dims()
 
 	for i := 0; i < nRows; i++ {
-		row := []*C.struct_feature_node{}
+		row := []C.struct_feature_node{}
 		for j := 0; j < nCols; j++ {
 			val := X.At(i, j)
 			if val != 0 {
-				row = append(row, &C.struct_feature_node{
-					index: C.int(j),
+				row = append(row, C.struct_feature_node{
+					index: C.int(j + 1),
 					value: C.double(val),
 				})
 			}
 		}
-		featureNodes = append(featureNodes, row[0])
+
+		row = append(row, C.struct_feature_node{
+			index: C.int(-1),
+			value: C.double(0),
+		})
+		featureNodes = append(featureNodes, &row[0])
 	}
 
 	return featureNodes
@@ -85,42 +109,24 @@ func MyTrain(X, y *mat64.Dense, bias bool, solverType int,
 	for _, v := range y.Col(nil, 0) {
 		cY = append(cY, C.double(v))
 	}
-	problem.x = &(toFeatureNodes(X)[0])
+	fns := toFeatureNodes(X)
+	problem.x = &fns[0]
 	problem.y = &cY[0]
 	problem.n = C.int(nRows)
 	problem.l = C.int(nCols)
+	problem.bias = C.double(-1)
 
 	var parameter C.struct_parameter
 	parameter.solver_type = C.int(solverType)
 	parameter.eps = C.double(eps)
 	parameter.C = C.double(C_)
 	parameter.nr_weight = C.int(nrWeight)
-	// parameter.weight_label = C.int(&weightLabel[0])
-	// parameter.weight= &weight[0]
-	// parameter.p = C.double(p)
+	parameter.weight_label = nil
+	parameter.weight = nil
+	parameter.p = C.double(p)
 
 	model := C.train(&problem, &parameter)
-	spew.Dump(model)
-	return &Model{}
-	// return &Model{
-	// 	cModel: model,
-	// }
+	return &Model{
+		cModel: model,
+	}
 }
-
-// func main() {
-// 	var problem C.struct_problem
-
-// 	data := mat64.NewDense(2, 3, []float64{
-// 		1, 3, 0,
-// 		0, 2, 0,
-// 	})
-
-// 	y := []C.double{3, 2, 3}
-
-// 	x := toFeatureNodes(data)
-
-// 	problem.l = 3
-// 	problem.n = 3
-// 	problem.y = &y[0]
-// 	problem.x = &x[0]
-// }
