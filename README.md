@@ -1,6 +1,8 @@
 LIBLINEAR for Go
 ==========
 
+[![Build Status](https://travis-ci.org/lazywei/liblinear.svg?branch=master)](https://travis-ci.org/lazywei/liblinear)
+
 This is a Golang wrapper for [LIBLINEAR (C.-J. Lin et al.)](http://ntucsu.csie.ntu.edu.tw/~cjlin/liblinear/) ([GitHub](https://github.com/cjlin1/liblinear)).
 Note that the interface of this package might be slightly different from
 liblinear C interface because of Go convention. Yet, I'll try to align the

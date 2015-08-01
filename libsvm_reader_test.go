@@ -1,7 +1,7 @@
 package liblinear_test
 
 import (
-	. "github.com/lazywei/mockingbird"
+	. "github.com/lazywei/liblinear"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
