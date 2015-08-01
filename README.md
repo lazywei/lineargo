@@ -6,7 +6,7 @@ Note that the interface of this package might be slightly different from
 liblinear C interface because of Go convention. Yet, I'll try to align the
 function name and functionality to liblinear C library.
 
-*GoDoc*: [Document](https://godoc.org/github.com/lazywei/liblinear).
+**GoDoc**: [Document](https://godoc.org/github.com/lazywei/liblinear).
 
 ## Introduction to LIBLINEAR
 
@@ -62,6 +62,14 @@ y_pred:= linear.Predict(model, X)
 
 fmt.Println(linear.Accuracy(y, y_pred))
 ```
+
+## Self-Promotion
+
+This package is mainly built because of
+[mockingbird](https://github.com/lazywei/mockingbird), which is a programming
+language classifier in Go. Mockingbird is my Google Summer of Code 2015 Project
+with GitHub and [linguist](https://github.com/github/linguist). If you like it,
+please feel free to follow linguist, mockingbird, and this library.
 
 ## Roadmap
 
