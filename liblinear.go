@@ -102,27 +102,36 @@ func MyTrain(X, y *mat64.Dense, bias bool, solverType int,
 	nrWeight int, weightLabel []int,
 	weight []float64, p float64,
 ) *Model {
+	var problem C.struct_problem
+	var parameter C.struct_parameter
+
 	nRows, nCols := X.Dims()
 
-	var problem C.struct_problem
-	cY := []C.double{}
-	for _, v := range y.Col(nil, 0) {
-		cY = append(cY, C.double(v))
-	}
-	fns := toFeatureNodes(X)
-	problem.x = &fns[0]
+	cY := mapCDouble(y.Col(nil, 0))
+	cX := toFeatureNodes(X)
+	problem.x = &cX[0]
 	problem.y = &cY[0]
 	problem.n = C.int(nRows)
 	problem.l = C.int(nCols)
 	problem.bias = C.double(-1)
 
-	var parameter C.struct_parameter
 	parameter.solver_type = C.int(solverType)
 	parameter.eps = C.double(eps)
 	parameter.C = C.double(C_)
 	parameter.nr_weight = C.int(nrWeight)
-	parameter.weight_label = nil
-	parameter.weight = nil
+
+	if weightLabel != nil {
+		parameter.weight_label = mapCInt(weightLabel)
+	} else {
+		parameter.weight_label = nil
+	}
+
+	if weight != nil {
+		parameter.weight = mapCDouble(weight)
+	} else {
+		parameter.weight = nil
+	}
+
 	parameter.p = C.double(p)
 
 	model := C.train(&problem, &parameter)
