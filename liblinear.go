@@ -175,13 +175,17 @@ func Predict(model *Model, X *mat64.Dense) *mat64.Dense {
 // double predict_probability(const struct model *model_, const struct feature_node *x, double* prob_estimates);
 func PredictProba(model *Model, X *mat64.Dense) *mat64.Dense {
 	nRows, _ := X.Dims()
+	nrClasses := int(C.get_nr_class(model.cModel))
+
 	cXs := toFeatureNodes(X)
-	y := mat64.NewDense(nRows, 2, nil)
-	proba := [2]C.double{}
+	y := mat64.NewDense(nRows, nrClasses, nil)
+
+	proba := make([]C.double, nrClasses, nrClasses)
 	for i, cX := range cXs {
 		C.predict_probability(model.cModel, cX, &proba[0])
-		y.Set(i, 0, float64(proba[0]))
-		y.Set(i, 1, float64(proba[1]))
+		for j := 0; j < nrClasses; j++ {
+			y.Set(i, j, float64(proba[j]))
+		}
 	}
 	return y
 }
