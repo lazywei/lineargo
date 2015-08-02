@@ -79,7 +79,7 @@ please feel free to follow linguist, mockingbird, and this library.
   - [x] LIBSVM format reader
   - [ ] Predict Probability
   - [ ] Cross Validation
-  - [ ] Save Model / Load Model
+  - [x] Save Model / Load Model
 - [ ] Better Wrapper for liblinear's C struct
   - [x] Model (wrap `struct model`)
   - [x] FeatureNode (wrap `struct feature_node`)

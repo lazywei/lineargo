@@ -28,7 +28,12 @@ struct model* goTrain(
 */
 import "C"
 
-import "github.com/gonum/matrix/mat64"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/gonum/matrix/mat64"
+)
 
 type FeatureNode struct {
 	// struct feature_node
@@ -121,6 +126,7 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 // C_ is the cost of constraints violation.
 //
 // p is the sensitiveness of loss of support vector regression.
+//
 // eps is the stopping criterion.
 //
 // nrWeight, weightLabel, and weight are used to change the penalty for some
@@ -136,8 +142,7 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 func Train(X, y *mat64.Dense, bias float64, solverType int,
 	eps, C_ float64,
 	nrWeight int, weightLabel []int,
-	weight []float64, p float64,
-) *Model {
+	weight []float64, p float64) *Model {
 	var problem C.struct_problem
 	var parameter C.struct_parameter
 
@@ -201,4 +206,24 @@ func Accuracy(y_true, y_pred *mat64.Dense) float64 {
 		total++
 	}
 	return correct / total
+}
+
+func SaveModel(model *Model, filename string) {
+	rtn := C.save_model(C.CString(filename), model.cModel)
+	if int(rtn) != 0 {
+		errStr := fmt.Sprintf("Error Code `%v` when trying to save model", int(rtn))
+		fmt.Println(errStr)
+		panic(errors.New(errStr))
+	}
+}
+
+func LoadModel(filename string) *Model {
+	model := C.load_model(C.CString(filename))
+	if model == nil {
+		errStr := fmt.Sprintf("Can't load model from %v", filename)
+		panic(errors.New(errStr))
+	}
+	return &Model{
+		cModel: model,
+	}
 }
