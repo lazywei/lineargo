@@ -41,9 +41,7 @@ go get github.com/lazywei/liblinear
 
 ## Usage
 
-Read libsvm format data into `*mat64.Dense` type. The recommended way to read
-libsvm format file is through
-[mockingbird](https://github.com/lazywei/mockingbird):
+*The package is based on [mat64](https://godoc.org/github.com/gonum/matrix/mat64).*
 
 ```go
 import linear "github.com/lazywei/liblinear"
