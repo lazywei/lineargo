@@ -49,15 +49,11 @@ import linear "github.com/lazywei/liblinear"
 // ReadLibsvm(filepath string, oneBased bool) (X, y *mat64.Dense)
 X, y := linear.ReadLibsvm("heart_scale", true)
 
-// linear.Train(
-// X, y *mat64.Dense,
-// bias float64,
-// solverType int,
-// eps, C_ float64,
-// nrWeight int, weightLabel []int,
-// weight []float64, p float64) (*Model)
+// Train(X, y *mat64.Dense, bias float64, solverType int,
+// 	eps, C_, p float64,
+// 	classWeights map[int]float64) (*Model)
 // Please checkout liblinear's doc for the explanation for these parameters.
-model := linear.Train(X, y, true, 0, 0.01, 1.0, 0, nil, nil, 0.1)
+model := Train(X, y, -1, 0, 0.01, 1.0, 0.1, map[int]float64{1: 1, -1: 1})
 y_pred:= linear.Predict(model, X)
 
 fmt.Println(linear.Accuracy(y, y_pred))
@@ -77,7 +73,7 @@ please feel free to follow linguist, mockingbird, and this library.
   - [x] Train
   - [x] Predict
   - [x] LIBSVM format reader
-  - [ ] Predict Probability
+  - [x] Predict Probability
   - [ ] Cross Validation
   - [x] Save Model / Load Model
 - [ ] Better Wrapper for liblinear's C struct

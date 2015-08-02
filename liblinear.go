@@ -102,28 +102,33 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 //         12 -- L2-regularized L2-loss support vector regression (dual)
 //         13 -- L2-regularized L1-loss support vector regression (dual)
 //
+// eps is the stopping criterion.
+//
 // C_ is the cost of constraints violation.
 //
 // p is the sensitiveness of loss of support vector regression.
 //
-// eps is the stopping criterion.
+// classWeights is a map from int to float64, with the key be the class and the
+// value be the weight. For example, {1: 10, -1: 0.5} means giving weight=10 for
+// class=1 while weight=0.5 for class=-1
 //
-// nrWeight, weightLabel, and weight are used to change the penalty for some
-// classes (If the weight for a class is not changed, it is set to 1). This is
-// useful for training classifier using unbalanced input data or with asymmetric
-// misclassification cost.
-//
-// nrWeight is the number of elements in the array weightLabel and
-// weight. Each weight[i] corresponds to weightLabel[i], meaning that
-// the penalty of class weightLabel[i] is scaled by a factor of weight[i].
-//
-// If you do not want to change penalty for any of the classes, just set nrWeight to 0.
+// If you do not want to change penalty for any of the classes, just set
+// classWeights to nil.
 func Train(X, y *mat64.Dense, bias float64, solverType int,
-	eps, C_ float64,
-	nrWeight int, weightLabel []int,
-	weight []float64, p float64) *Model {
+	eps, C_, p float64,
+	classWeights map[int]float64) *Model {
+
 	var problem C.struct_problem
 	var parameter C.struct_parameter
+
+	nrWeight := len(classWeights)
+	weightLabel := []int{}
+	weight := []float64{}
+
+	for key, val := range classWeights {
+		weightLabel = append(weightLabel, key)
+		weight = append(weight, val)
+	}
 
 	nRows, nCols := X.Dims()
 
@@ -138,21 +143,17 @@ func Train(X, y *mat64.Dense, bias float64, solverType int,
 	parameter.solver_type = C.L2R_LR
 	parameter.eps = C.double(eps)
 	parameter.C = C.double(C_)
+	parameter.p = C.double(p)
+
 	parameter.nr_weight = C.int(nrWeight)
 
-	if weightLabel != nil {
+	if nrWeight > 0 {
 		parameter.weight_label = &mapCInt(weightLabel)[0]
-	} else {
-		parameter.weight_label = nil
-	}
-
-	if weight != nil {
 		parameter.weight = &mapCDouble(weight)[0]
 	} else {
+		parameter.weight_label = nil
 		parameter.weight = nil
 	}
-
-	parameter.p = C.double(p)
 
 	model := C.train(&problem, &parameter)
 	return &Model{
