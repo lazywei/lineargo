@@ -114,21 +114,9 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 //
 // If you do not want to change penalty for any of the classes, just set
 // classWeights to nil.
-func Train(X, y *mat64.Dense, bias float64, solverType int,
-	eps, C_, p float64,
-	classWeights map[int]float64) *Model {
+func Train(X, y *mat64.Dense, bias float64, pm *Parameter) *Model {
 
 	var problem C.struct_problem
-	var parameter C.struct_parameter
-
-	nrWeight := len(classWeights)
-	weightLabel := []int{}
-	weight := []float64{}
-
-	for key, val := range classWeights {
-		weightLabel = append(weightLabel, key)
-		weight = append(weight, val)
-	}
 
 	nRows, nCols := X.Dims()
 
@@ -140,22 +128,7 @@ func Train(X, y *mat64.Dense, bias float64, solverType int,
 	problem.l = C.int(nRows)
 	problem.bias = C.double(bias)
 
-	parameter.solver_type = C.L2R_LR
-	parameter.eps = C.double(eps)
-	parameter.C = C.double(C_)
-	parameter.p = C.double(p)
-
-	parameter.nr_weight = C.int(nrWeight)
-
-	if nrWeight > 0 {
-		parameter.weight_label = &mapCInt(weightLabel)[0]
-		parameter.weight = &mapCDouble(weight)[0]
-	} else {
-		parameter.weight_label = nil
-		parameter.weight = nil
-	}
-
-	model := C.train(&problem, &parameter)
+	model := C.train(&problem, pm.GetPtr())
 	return &Model{
 		cModel: model,
 	}

@@ -79,6 +79,6 @@ please feel free to follow linguist, mockingbird, and this library.
 - [ ] Better Wrapper for liblinear's C struct
   - [x] Model (wrap `struct model`)
   - [x] FeatureNode (wrap `struct feature_node`)
-  - [ ] Parameter (wrap `struct parameter`)
+  - [x] Parameter (wrap `struct parameter`)
   - [ ] Problem (wrap `struct problem`)
 - [ ] Abstraction for classifier: encapsulate `model`
