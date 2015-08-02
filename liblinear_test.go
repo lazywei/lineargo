@@ -48,4 +48,14 @@ var _ = Describe("Liblinear", func() {
 			Expect(func() { LoadModel("test_fixture/heart_scale.model") }).NotTo(Panic())
 		})
 	})
+
+	Describe("PredictProba", func() {
+		It("should return probability estimation", func() {
+			X, y := ReadLibsvm("test_fixture/heart_scale", true)
+			model := Train(X, y, -1, 0, 0.01, 1.0, 0, nil, nil, 0.1)
+			y_pred := PredictProba(model, X).Row(nil, 0)
+			Expect(y_pred[0]).To(BeNumerically("~", 0.95409, 1e-5))
+			Expect(y_pred[1]).To(BeNumerically("~", 0.0459103, 1e-5))
+		})
+	})
 })
