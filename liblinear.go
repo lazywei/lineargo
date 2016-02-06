@@ -120,7 +120,7 @@ func Train(X, y *mat64.Dense, bias float64, pm *Parameter) *Model {
 
 	nRows, nCols := X.Dims()
 
-	cY := mapCDouble(y.Col(nil, 0))
+	cY := mapCDouble(y.ColView(0).RawVector().Data)
 	cX := toFeatureNodes(X)
 	problem.x = &cX[0]
 	problem.y = &cY[0]
@@ -164,8 +164,8 @@ func PredictProba(model *Model, X *mat64.Dense) *mat64.Dense {
 }
 
 func Accuracy(y_true, y_pred *mat64.Dense) float64 {
-	y1 := y_true.Col(nil, 0)
-	y2 := y_pred.Col(nil, 0)
+	y1 := y_true.ColView(0).RawVector().Data
+	y2 := y_pred.ColView(0).RawVector().Data
 
 	total := 0.0
 	correct := 0.0
