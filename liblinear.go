@@ -4,12 +4,74 @@ package liblinear
 #cgo LDFLAGS: -llinear
 #include <linear.h>
 #include <stdio.h>
+#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+
+static struct model* call_train(double* x, double* y, int nCols, int nRows, double bias, struct parameter param) {
+  int nElems = 0;
+  int i, j, x_idx;
+  double elem;
+
+  struct feature_node *x_space;
+  struct problem prob;
+  struct model* model_;
+
+  // printf("\nnCols= %d\n", nCols);
+  // printf("\nnRows= %d\n", nRows);
+
+  prob.bias = bias;
+  prob.l = nRows;
+  if (prob.bias >= 0) {
+    prob.n = nCols + 1;
+  } else {
+    prob.n = nCols;
+  }
+  prob.y = y;
+
+  for (i = 0; i < nRows; i++) {
+    for (j = 0; j < nCols; j++) {
+      elem = x[i*nCols+j];
+      if (elem != 0) {
+        ++nElems;
+      }
+    }
+    nElems++; // for bias term
+  }
+  // printf("\n\nnElems = %d\n", nElems);
+
+  prob.x = Malloc(struct feature_node *, nRows);
+  x_space = Malloc(struct feature_node, nElems + nRows);
+
+  x_idx = 0;
+  for (i = 0; i < nRows; i++) {
+    prob.x[i] = &x_space[x_idx];
+
+    for (j = 0; j < nCols; j++) {
+      elem = x[i*nCols+j];
+      if (elem != 0) {
+        x_space[x_idx].index = j + 1;
+        x_space[x_idx].value = elem;
+        ++x_idx;
+      }
+    }
+    if (prob.bias >= 0) {
+      x_space[x_idx].index = j + 1;
+      x_space[x_idx].value = prob.bias;
+    }
+    ++x_idx;
+    x_space[x_idx].index = -1;
+    ++x_idx;
+  }
+  // printf("\nx_idx = %d\n", x_idx);
+
+  return train(&prob, &param);
+}
 */
 import "C"
 
 import (
 	"errors"
 	"fmt"
+	"unsafe"
 
 	"github.com/gonum/matrix/mat64"
 )
@@ -116,19 +178,15 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 // classWeights to nil.
 func Train(X, y *mat64.Dense, bias float64, pm *Parameter) *Model {
 
-	var problem C.struct_problem
+	// var problem C.struct_problem
 
 	nRows, nCols := X.Dims()
 
-	cY := mapCDouble(y.ColView(0).RawVector().Data)
-	cX := toFeatureNodes(X)
-	problem.x = &cX[0]
-	problem.y = &cY[0]
-	problem.n = C.int(nCols)
-	problem.l = C.int(nRows)
-	problem.bias = C.double(bias)
+	cY := y.ColView(0).RawVector().Data
+	cX := X.RawMatrix().Data
 
-	model := C.train(&problem, pm.GetPtr())
+	// model := C.call_train(problem, pm.GetPtr())
+	model := C.call_train((*C.double)(&cX[0]), (*C.double)(unsafe.Pointer(&cY[0])), C.int(nCols), C.int(nRows), C.double(bias), pm.GetPtr())
 	return &Model{
 		cModel: model,
 	}

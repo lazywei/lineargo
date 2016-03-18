@@ -6,6 +6,7 @@ package liblinear
 #include <stdio.h>
 */
 import "C"
+import "unsafe"
 
 type Parameter struct {
 	// struct parameter
@@ -26,7 +27,7 @@ type Parameter struct {
 	ClassWeights map[int]float64
 }
 
-func (pm *Parameter) GetPtr() *C.struct_parameter {
+func (pm *Parameter) GetPtr() C.struct_parameter {
 	var cParameter C.struct_parameter
 
 	nrWeight := len(pm.ClassWeights)
@@ -46,12 +47,12 @@ func (pm *Parameter) GetPtr() *C.struct_parameter {
 	cParameter.nr_weight = C.int(nrWeight)
 
 	if nrWeight > 0 {
-		cParameter.weight_label = &mapCInt(weightLabel)[0]
-		cParameter.weight = &mapCDouble(weight)[0]
+		cParameter.weight_label = (*C.int)(unsafe.Pointer(&weightLabel[0]))
+		cParameter.weight = (*C.double)(unsafe.Pointer(&weight[0]))
 	} else {
 		cParameter.weight_label = nil
 		cParameter.weight = nil
 	}
 
-	return &cParameter
+	return cParameter
 }
