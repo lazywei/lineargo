@@ -92,3 +92,32 @@ double* call_predict(const struct model *model_, double* x, int n_rows, int n_co
   }
   return result;
 }
+
+double* call_predict_proba(const struct model *model_, double* x,
+                           int n_rows, int n_cols, int n_classes) {
+  int i, j;
+  struct feature_node** fn_x;
+  double* result;
+  double* proba;
+
+  result = calloc(n_rows * n_classes, sizeof(double));
+  proba = calloc(n_classes, sizeof(double));
+
+  fn_x = build_feature_node(x, n_rows, n_cols, -1);
+
+  for (i = 0; i < n_rows; ++i) {
+    predict_probability(model_, fn_x[i], proba);
+    for (j = 0; j < n_classes; ++j) {
+      if (i == 0) {
+        printf("\n%f\n", proba[j]);
+      }
+      result[i*n_classes+j] = proba[j];
+
+    }
+  }
+
+  printf("\n%f\n", result[0]);
+  printf("\n%f\n", result[1]);
+  free(proba);
+  return result;
+}

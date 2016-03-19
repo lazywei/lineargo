@@ -1,11 +1,13 @@
 package liblinear
 
 /*
-#cgo CFLAGS: -std=c11
 #include <stdlib.h>
 */
 import "C"
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
 
 func mapCDouble(in []float64) []C.double {
 	out := make([]C.double, len(in), len(in))
@@ -25,6 +27,8 @@ func mapCInt(in []int) []C.int {
 
 // convert C double pointer to float64 slice ...
 func doubleToFloats(in *C.double, size int) []float64 {
+	fmt.Println("in first")
+	fmt.Println(*in)
 	defer C.free(unsafe.Pointer(in))
 	out := (*[1 << 30]float64)(unsafe.Pointer(in))[:size:size]
 	return out

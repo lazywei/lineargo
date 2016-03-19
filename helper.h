@@ -9,4 +9,7 @@ struct model* call_train(double* x, double* y, int nCols, int nRows, double bias
 
 double* call_predict(const struct model *model_, const double* x, int nCols, int nRows);
 
+double* call_predict_proba(const struct model *model_, double* x,
+                           int n_rows, int n_cols, int n_classes);
+
 #endif

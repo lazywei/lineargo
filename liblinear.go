@@ -1,7 +1,6 @@
 package liblinear
 
 /*
-#cgo CFLAGS: -std=c11
 #cgo LDFLAGS: -llinear
 #include <linear.h>
 #include <stdio.h>
@@ -111,23 +110,22 @@ func Predict(model *Model, X *mat64.Dense) *mat64.Dense {
 	return y
 }
 
-// // double predict_probability(const struct model *model_, const struct feature_node *x, double* prob_estimates);
-// func PredictProba(model *Model, X *mat64.Dense) *mat64.Dense {
-// 	nRows, _ := X.Dims()
-// 	nrClasses := int(C.get_nr_class(model.cModel))
+// double predict_probability(const struct model *model_, const struct feature_node *x, double* prob_estimates);
+func PredictProba(model *Model, X *mat64.Dense) *mat64.Dense {
+	nRows, nCols := X.Dims()
+	nrClasses := int(C.get_nr_class(model.cModel))
 
-// 	cXs := toFeatureNodes(X)
-// 	y := mat64.NewDense(nRows, nrClasses, nil)
+	cX := mapCDouble(X.RawMatrix().Data)
+	y := mat64.NewDense(nRows, nrClasses, nil)
 
-// 	proba := make([]C.double, nrClasses, nrClasses)
-// 	// for i, cX := range cXs {
-// 	// 	C.predict_probability(model.cModel, cX, &proba[0])
-// 	// 	for j := 0; j < nrClasses; j++ {
-// 	// 		y.Set(i, j, float64(proba[j]))
-// 	// 	}
-// 	// }
-// 	return y
-// }
+	result := doubleToFloats(C.call_predict_proba(
+		model.cModel, &cX[0], C.int(nRows), C.int(nCols), C.int(nrClasses)),
+		nRows*nrClasses)
+	for i := 0; i < nRows; i++ {
+		y.SetRow(i, result[i*nrClasses:(i+1)*nrClasses])
+	}
+	return y
+}
 
 func Accuracy(y_true, y_pred *mat64.Dense) float64 {
 	y1 := y_true.ColView(0).RawVector().Data
