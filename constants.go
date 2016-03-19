@@ -1,6 +1,7 @@
 package liblinear
 
 /*
+#cgo CFLAGS: -std=c11
 #cgo LDFLAGS: -llinear
 #include <linear.h>
 #include <stdio.h>

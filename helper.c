@@ -64,13 +64,6 @@ struct model* call_train(double* x, double* y, int n_rows, int n_cols, double bi
   param.nr_weight = nr_weight;
   param.p = p;
 
-  /* printf("\nclass_weights = %d\n", param.weight_label[0]); */
-  /* printf("\nclass_weights = %d\n", param.weight_label[1]); */
-  /* printf("\nweights = %f\n", param.weight[0]); */
-  /* printf("\nweights = %f\n", param.weight[1]); */
-  // printf("\nnCols= %d\n", n_cols);
-  // printf("\nnRows= %d\n", n_rows);
-
   prob.bias = bias;
   prob.l = n_rows;
   if (prob.bias >= 0) {
@@ -86,6 +79,7 @@ struct model* call_train(double* x, double* y, int n_rows, int n_cols, double bi
 
 
 double* call_predict(const struct model *model_, double* x, int n_rows, int n_cols) {
+  int i;
   struct feature_node** fn_x;
   double* result;
 
@@ -93,7 +87,7 @@ double* call_predict(const struct model *model_, double* x, int n_rows, int n_co
 
   fn_x = build_feature_node(x, n_rows, n_cols, -1);
 
-  for (int i = 0; i < n_rows; ++i) {
+  for (i = 0; i < n_rows; ++i) {
     result[i] = predict(model_, fn_x[i]);
   }
   return result;
