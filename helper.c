@@ -3,15 +3,29 @@
 
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
 
-struct model* call_train(double* x, double* y, int nCols, int nRows, double bias, struct parameter param) {
+struct model* call_train(double* x, double* y, int nCols, int nRows, double bias,
+                         int solver_type, double eps, double c, double p,
+                         int nr_weight, int* weight_label, double* weight) {
   int nElems = 0;
   int i, j, x_idx;
   double elem;
 
   struct feature_node *x_space;
   struct problem prob;
-  struct model* model_;
+  struct parameter param;
 
+  param.weight_label = weight_label;
+  param.weight = weight;
+  param.solver_type = solver_type;
+  param.eps = eps;
+  param.C = c;
+  param.nr_weight = nr_weight;
+  param.p = p;
+
+  printf("\nclass_weights = %d\n", param.weight_label[0]);
+  printf("\nclass_weights = %d\n", param.weight_label[1]);
+  /* printf("\nweights = %f\n", param.weight[0]); */
+  /* printf("\nweights = %f\n", param.weight[1]); */
   // printf("\nnCols= %d\n", nCols);
   // printf("\nnRows= %d\n", nRows);
 

@@ -116,17 +116,41 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 //
 // If you do not want to change penalty for any of the classes, just set
 // classWeights to nil.
-func Train(X, y *mat64.Dense, bias float64, pm *Parameter) *Model {
-
-	// var problem C.struct_problem
+func Train(X, y *mat64.Dense, bias float64, solverType int, eps, c_, p float64, classWeights map[int]float64) *Model {
+	var weightLabelPtr *C.int
+	var weightPtr *C.double
 
 	nRows, nCols := X.Dims()
 
 	cY := y.ColView(0).RawVector().Data
 	cX := X.RawMatrix().Data
 
-	// model := C.call_train(problem, pm.GetPtr())
-	model := C.call_train((*C.double)(&cX[0]), (*C.double)(unsafe.Pointer(&cY[0])), C.int(nCols), C.int(nRows), C.double(bias), pm.GetPtr())
+	nrWeight := len(classWeights)
+	weightLabel := []C.int{}
+	weight := []C.double{}
+
+	for key, val := range classWeights {
+		weightLabel = append(weightLabel, (C.int)(key))
+		weight = append(weight, (C.double)(val))
+	}
+
+	if nrWeight > 0 {
+		weightLabelPtr = &weightLabel[0]
+		weightPtr = &weight[0]
+	} else {
+		weightLabelPtr = nil
+		weightPtr = nil
+	}
+
+	model := C.call_train(
+		(*C.double)(&cX[0]),
+		(*C.double)(unsafe.Pointer(&cY[0])),
+		C.int(nCols), C.int(nRows), C.double(bias),
+		C.int(solverType), C.double(eps), C.double(c_), C.double(p),
+		C.int(nrWeight),
+		weightLabelPtr,
+		weightPtr)
+
 	return &Model{
 		cModel: model,
 	}
