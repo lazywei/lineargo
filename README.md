@@ -24,13 +24,16 @@ LIBLINEAR is a linear classifier for data with millions of instances and feature
 
 ## Install
 
-This package depends on LIBLINEAR 2.01+. Please install it first via Homebrew or
+This package depends on LIBLINEAR 2.1+ and Go 1.6+. Please install them first via Homebrew or
 other package managers on your OS:
 
 ```
 brew update
-brew info liblinear # make sure your formula will install version higher than 2.01
+brew info liblinear # make sure your formula will install version higher than 2.1
 brew install liblinear
+
+brew info go # make sure version 1.6+
+brew install go
 ```
 
 After liblinear installation, just `go get` this package

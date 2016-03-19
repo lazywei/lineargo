@@ -1,10 +1,51 @@
 #include <linear.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
+struct feature_node** build_feature_node(double* x, int n_rows, int n_cols, double bias) {
+  struct feature_node** fn_x;
+  struct feature_node* x_space;
+  double elem = 0;
+  int n_elems = 0, x_idx = 0, i = 0, j = 0;
 
-struct model* call_train(double* x, double* y, int nCols, int nRows, double bias,
-                         int solver_type, double eps, double c, double p,
+  for (i = 0; i < n_rows; i++) {
+    for (j = 0; j < n_cols; j++) {
+      elem = x[i*n_cols+j];
+      if (elem != 0)
+        ++n_elems;
+    }
+  }
+  n_elems += n_rows; // for bias term
+
+  fn_x = calloc(n_rows, sizeof(struct feature_node *));
+  x_space = calloc(n_elems + n_rows, sizeof(struct feature_node));
+
+  x_idx = 0;
+  for (i = 0; i < n_rows; i++) {
+    fn_x[i] = &x_space[x_idx];
+
+    for (j = 0; j < n_cols; j++) {
+      elem = x[i*n_cols+j];
+      if (elem != 0) {
+        x_space[x_idx].index = j + 1;
+        x_space[x_idx].value = elem;
+        ++x_idx;
+      }
+    }
+    if (bias >= 0) {
+      x_space[x_idx].index = j + 1;
+      x_space[x_idx].value = bias;
+    }
+    ++x_idx;
+    x_space[x_idx].index = -1;
+    ++x_idx;
+  }
+
+  return fn_x;
+}
+
+struct model* call_train(double* x, double* y, int n_rows, int n_cols, double bias,
+                         int solver_type, double C, double p, double eps,
                          int nr_weight, int* weight_label, double* weight) {
   int nElems = 0;
   int i, j, x_idx;
@@ -16,63 +57,44 @@ struct model* call_train(double* x, double* y, int nCols, int nRows, double bias
 
   param.weight_label = weight_label;
   param.weight = weight;
-  param.solver_type = solver_type;
+  param.init_sol = NULL;
+  param.solver_type = 0;
   param.eps = eps;
-  param.C = c;
+  param.C = C;
   param.nr_weight = nr_weight;
   param.p = p;
 
-  printf("\nclass_weights = %d\n", param.weight_label[0]);
-  printf("\nclass_weights = %d\n", param.weight_label[1]);
+  /* printf("\nclass_weights = %d\n", param.weight_label[0]); */
+  /* printf("\nclass_weights = %d\n", param.weight_label[1]); */
   /* printf("\nweights = %f\n", param.weight[0]); */
   /* printf("\nweights = %f\n", param.weight[1]); */
-  // printf("\nnCols= %d\n", nCols);
-  // printf("\nnRows= %d\n", nRows);
+  // printf("\nnCols= %d\n", n_cols);
+  // printf("\nnRows= %d\n", n_rows);
 
   prob.bias = bias;
-  prob.l = nRows;
+  prob.l = n_rows;
   if (prob.bias >= 0) {
-    prob.n = nCols + 1;
+    prob.n = n_cols + 1;
   } else {
-    prob.n = nCols;
+    prob.n = n_cols;
   }
   prob.y = y;
-
-  for (i = 0; i < nRows; i++) {
-    for (j = 0; j < nCols; j++) {
-      elem = x[i*nCols+j];
-      if (elem != 0) {
-        ++nElems;
-      }
-    }
-    nElems++; // for bias term
-  }
-  // printf("\n\nnElems = %d\n", nElems);
-
-  prob.x = Malloc(struct feature_node *, nRows);
-  x_space = Malloc(struct feature_node, nElems + nRows);
-
-  x_idx = 0;
-  for (i = 0; i < nRows; i++) {
-    prob.x[i] = &x_space[x_idx];
-
-    for (j = 0; j < nCols; j++) {
-      elem = x[i*nCols+j];
-      if (elem != 0) {
-        x_space[x_idx].index = j + 1;
-        x_space[x_idx].value = elem;
-        ++x_idx;
-      }
-    }
-    if (prob.bias >= 0) {
-      x_space[x_idx].index = j + 1;
-      x_space[x_idx].value = prob.bias;
-    }
-    ++x_idx;
-    x_space[x_idx].index = -1;
-    ++x_idx;
-  }
-  // printf("\nx_idx = %d\n", x_idx);
+  prob.x = build_feature_node(x, n_rows, n_cols, prob.bias);
 
   return train(&prob, &param);
+}
+
+
+double* call_predict(const struct model *model_, double* x, int n_rows, int n_cols) {
+  struct feature_node** fn_x;
+  double* result;
+
+  result = calloc(n_rows, sizeof(double));
+
+  fn_x = build_feature_node(x, n_rows, n_cols, -1);
+
+  for (int i = 0; i < n_rows; ++i) {
+    result[i] = predict(model_, fn_x[i]);
+  }
+  return result;
 }
