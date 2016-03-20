@@ -24,13 +24,16 @@ LIBLINEAR is a linear classifier for data with millions of instances and feature
 
 ## Install
 
-This package depends on LIBLINEAR 2.01+. Please install it first via Homebrew or
+This package depends on LIBLINEAR 2.1+ and Go 1.6+. Please install them first via Homebrew or
 other package managers on your OS:
 
 ```
 brew update
-brew info liblinear # make sure your formula will install version higher than 2.01
+brew info liblinear # make sure your formula will install version higher than 2.1
 brew install liblinear
+
+brew info go # make sure version 1.6+
+brew install go
 ```
 
 After liblinear installation, just `go get` this package
@@ -50,10 +53,10 @@ import linear "github.com/lazywei/liblinear"
 X, y := linear.ReadLibsvm("heart_scale", true)
 
 // Train(X, y *mat64.Dense, bias float64, solverType int,
-// 	eps, C_, p float64,
+// 	C_, p, eps float64,
 // 	classWeights map[int]float64) (*Model)
 // Please checkout liblinear's doc for the explanation for these parameters.
-model := Train(X, y, -1, 0, 0.01, 1.0, 0.1, map[int]float64{1: 1, -1: 1})
+model := linear.Train(X, y, -1, linear.L2R_LR, 1.0, 0.1, 0.01, map[int]float64{1: 1, -1: 1})
 y_pred:= linear.Predict(model, X)
 
 fmt.Println(linear.Accuracy(y, y_pred))

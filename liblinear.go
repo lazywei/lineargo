@@ -4,6 +4,7 @@ package liblinear
 #cgo LDFLAGS: -llinear
 #include <linear.h>
 #include <stdio.h>
+#include "helper.h"
 */
 import "C"
 
@@ -13,32 +14,6 @@ import (
 
 	"github.com/gonum/matrix/mat64"
 )
-
-type FeatureNode struct {
-	// struct feature_node
-	// {
-	// 	int index;
-	// 	double value;
-	// };
-	cFeatureNode *C.struct_feature_node
-}
-
-func NewFeatureNode(index int, value float64) *FeatureNode {
-	return &FeatureNode{
-		cFeatureNode: &C.struct_feature_node{
-			index: C.int(index),
-			value: C.double(value),
-		},
-	}
-}
-
-func (fn *FeatureNode) GetData() (int, float64) {
-	return int(fn.cFeatureNode.index), float64(fn.cFeatureNode.value)
-}
-
-func (fn *FeatureNode) GetPtr() *C.struct_feature_node {
-	return fn.cFeatureNode
-}
 
 type Model struct {
 	// struct model
@@ -51,33 +26,6 @@ type Model struct {
 	// 	double bias;
 	// };
 	cModel *C.struct_model
-}
-
-func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
-	featureNodes := []*C.struct_feature_node{}
-
-	nRows, nCols := X.Dims()
-
-	for i := 0; i < nRows; i++ {
-		row := []C.struct_feature_node{}
-		for j := 0; j < nCols; j++ {
-			val := X.At(i, j)
-			if val != 0 {
-				row = append(row, C.struct_feature_node{
-					index: C.int(j + 1),
-					value: C.double(val),
-				})
-			}
-		}
-
-		row = append(row, C.struct_feature_node{
-			index: C.int(-1),
-			value: C.double(0),
-		})
-		featureNodes = append(featureNodes, &row[0])
-	}
-
-	return featureNodes
 }
 
 // Wrapper for the `train` function in liblinear.
@@ -114,21 +62,38 @@ func toFeatureNodes(X *mat64.Dense) []*C.struct_feature_node {
 //
 // If you do not want to change penalty for any of the classes, just set
 // classWeights to nil.
-func Train(X, y *mat64.Dense, bias float64, pm *Parameter) *Model {
-
-	var problem C.struct_problem
+func Train(X, y *mat64.Dense, bias float64, solverType int, c_, p, eps float64, classWeights map[int]float64) *Model {
+	var weightLabelPtr *C.int
+	var weightPtr *C.double
 
 	nRows, nCols := X.Dims()
 
+	cX := mapCDouble(X.RawMatrix().Data)
 	cY := mapCDouble(y.ColView(0).RawVector().Data)
-	cX := toFeatureNodes(X)
-	problem.x = &cX[0]
-	problem.y = &cY[0]
-	problem.n = C.int(nCols)
-	problem.l = C.int(nRows)
-	problem.bias = C.double(bias)
 
-	model := C.train(&problem, pm.GetPtr())
+	nrWeight := len(classWeights)
+	weightLabel := []C.int{}
+	weight := []C.double{}
+
+	for key, val := range classWeights {
+		weightLabel = append(weightLabel, (C.int)(key))
+		weight = append(weight, (C.double)(val))
+	}
+
+	if nrWeight > 0 {
+		weightLabelPtr = &weightLabel[0]
+		weightPtr = &weight[0]
+	} else {
+		weightLabelPtr = nil
+		weightPtr = nil
+	}
+
+	model := C.call_train(
+		&cX[0], &cY[0],
+		C.int(nRows), C.int(nCols), C.double(bias),
+		C.int(solverType), C.double(c_), C.double(p), C.double(eps),
+		C.int(nrWeight), weightLabelPtr, weightPtr)
+
 	return &Model{
 		cModel: model,
 	}
@@ -136,29 +101,28 @@ func Train(X, y *mat64.Dense, bias float64, pm *Parameter) *Model {
 
 // double predict(const struct model *model_, const struct feature_node *x);
 func Predict(model *Model, X *mat64.Dense) *mat64.Dense {
-	nRows, _ := X.Dims()
-	cXs := toFeatureNodes(X)
+	nRows, nCols := X.Dims()
+	cX := mapCDouble(X.RawMatrix().Data)
 	y := mat64.NewDense(nRows, 1, nil)
-	for i, cX := range cXs {
-		y.Set(i, 0, float64(C.predict(model.cModel, cX)))
-	}
+	result := doubleToFloats(C.call_predict(
+		model.cModel, &cX[0], C.int(nRows), C.int(nCols)), nRows)
+	y.SetCol(0, result)
 	return y
 }
 
 // double predict_probability(const struct model *model_, const struct feature_node *x, double* prob_estimates);
 func PredictProba(model *Model, X *mat64.Dense) *mat64.Dense {
-	nRows, _ := X.Dims()
+	nRows, nCols := X.Dims()
 	nrClasses := int(C.get_nr_class(model.cModel))
 
-	cXs := toFeatureNodes(X)
+	cX := mapCDouble(X.RawMatrix().Data)
 	y := mat64.NewDense(nRows, nrClasses, nil)
 
-	proba := make([]C.double, nrClasses, nrClasses)
-	for i, cX := range cXs {
-		C.predict_probability(model.cModel, cX, &proba[0])
-		for j := 0; j < nrClasses; j++ {
-			y.Set(i, j, float64(proba[j]))
-		}
+	result := doubleToFloats(C.call_predict_proba(
+		model.cModel, &cX[0], C.int(nRows), C.int(nCols), C.int(nrClasses)),
+		nRows*nrClasses)
+	for i := 0; i < nRows; i++ {
+		y.SetRow(i, result[i*nrClasses:(i+1)*nrClasses])
 	}
 	return y
 }
