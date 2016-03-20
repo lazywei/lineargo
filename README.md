@@ -53,10 +53,10 @@ import linear "github.com/lazywei/liblinear"
 X, y := linear.ReadLibsvm("heart_scale", true)
 
 // Train(X, y *mat64.Dense, bias float64, solverType int,
-// 	eps, C_, p float64,
+// 	C_, p, eps float64,
 // 	classWeights map[int]float64) (*Model)
 // Please checkout liblinear's doc for the explanation for these parameters.
-model := Train(X, y, -1, 0, 0.01, 1.0, 0.1, map[int]float64{1: 1, -1: 1})
+model := linear.Train(X, y, -1, linear.L2R_LR, 1.0, 0.1, 0.01, map[int]float64{1: 1, -1: 1})
 y_pred:= linear.Predict(model, X)
 
 fmt.Println(linear.Accuracy(y, y_pred))
