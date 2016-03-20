@@ -1,7 +1,6 @@
 package liblinear_test
 
 import (
-	"fmt"
 	"os"
 
 	. "github.com/lazywei/liblinear"
@@ -46,7 +45,6 @@ var _ = Describe("Liblinear", func() {
 			X, y := ReadLibsvm("test_fixture/heart_scale", true)
 			model := Train(X, y, -1, L2R_LR, 1.0, 0.1, 0.01, map[int]float64{1: 1, -1: 1})
 			y_pred := PredictProba(model, X).RowView(0).RawVector().Data
-			fmt.Println(y_pred)
 			Expect(y_pred[0]).To(BeNumerically("==", 0.9540896949580882))
 			Expect(y_pred[1]).To(BeNumerically("==", 0.04591030504191185))
 		})

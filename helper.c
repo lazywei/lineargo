@@ -107,17 +107,10 @@ double* call_predict_proba(const struct model *model_, double* x,
 
   for (i = 0; i < n_rows; ++i) {
     predict_probability(model_, fn_x[i], proba);
-    for (j = 0; j < n_classes; ++j) {
-      if (i == 0) {
-        printf("\n%f\n", proba[j]);
-      }
+    for (j = 0; j < n_classes; ++j)
       result[i*n_classes+j] = proba[j];
-
-    }
   }
 
-  printf("\n%f\n", result[0]);
-  printf("\n%f\n", result[1]);
   free(proba);
   return result;
 }
