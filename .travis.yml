@@ -6,11 +6,11 @@ go:
 before_install:
   - go get github.com/onsi/ginkgo/ginkgo
   - go get github.com/onsi/gomega
-  - wget http://ntucsu.csie.ntu.edu.tw/~cjlin/liblinear/oldfiles/liblinear-2.1.tar.gz -O /tmp/liblinear.tar.gz
+  - wget https://github.com/cjlin1/liblinear/archive/v210.tar.gz -O /tmp/liblinear.tar.gz
   - tar -xvf /tmp/liblinear.tar.gz
-  - cd liblinear-2.1 && make lib && pwd && ln -s liblinear.so.3 liblinear.so && cd -
-  - export C_INCLUDE_PATH=$PWD/liblinear-2.1:$C_INCLUDE_PATH
-  - export LD_LIBRARY_PATH=$PWD/liblinear-2.1:$LD_LIBRARY_PATH
-  - export LIBRARY_PATH=$PWD/liblinear-2.1:$LIBRARY_PATH
+  - cd liblinear-210 && make lib && pwd && ln -s liblinear.so.3 liblinear.so && cd -
+  - export C_INCLUDE_PATH=$PWD/liblinear-210:$C_INCLUDE_PATH
+  - export LD_LIBRARY_PATH=$PWD/liblinear-210:$LD_LIBRARY_PATH
+  - export LIBRARY_PATH=$PWD/liblinear-210:$LIBRARY_PATH
 script:
   - ginkgo

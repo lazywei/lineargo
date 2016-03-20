@@ -30,6 +30,11 @@ func doubleToFloats(in *C.double, size int) []float64 {
 	fmt.Println("in first")
 	fmt.Println(*in)
 	defer C.free(unsafe.Pointer(in))
-	out := (*[1 << 30]float64)(unsafe.Pointer(in))[:size:size]
+	outD := (*[1 << 30]C.double)(unsafe.Pointer(in))[:size:size]
+	out := make([]float64, size, size)
+	for i := 0; i < size; i++ {
+		out[i] = float64(outD[i])
+	}
+
 	return out
 }
