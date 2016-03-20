@@ -1,14 +1,14 @@
 LinearGo: LIBLINEAR for Go
 ==========
 
-[![Build Status](https://travis-ci.org/lazywei/liblinear.svg?branch=master)](https://travis-ci.org/lazywei/liblinear)
+[![Build Status](https://travis-ci.org/lazywei/lineargo.svg?branch=master)](https://travis-ci.org/lazywei/lineargo)
 
 This is a Golang wrapper for [LIBLINEAR (C.-J. Lin et al.)](http://ntucsu.csie.ntu.edu.tw/~cjlin/liblinear/) ([GitHub](https://github.com/cjlin1/liblinear)).
 Note that the interface of this package might be slightly different from
 liblinear C interface because of Go convention. Yet, I'll try to align the
 function name and functionality to liblinear C library.
 
-**GoDoc**: [Document](https://godoc.org/github.com/lazywei/liblinear).
+**GoDoc**: [Document](https://godoc.org/github.com/lazywei/lineargo).
 
 ## Introduction to LIBLINEAR
 
@@ -69,19 +69,3 @@ This package is mainly built because of
 language classifier in Go. Mockingbird is my Google Summer of Code 2015 Project
 with GitHub and [linguist](https://github.com/github/linguist). If you like it,
 please feel free to follow linguist, mockingbird, and this library.
-
-## Roadmap
-
-- [ ] Wrap core functions
-  - [x] Train
-  - [x] Predict
-  - [x] LIBSVM format reader
-  - [x] Predict Probability
-  - [ ] Cross Validation
-  - [x] Save Model / Load Model
-- [ ] Better Wrapper for liblinear's C struct
-  - [x] Model (wrap `struct model`)
-  - [x] FeatureNode (wrap `struct feature_node`)
-  - [x] Parameter (wrap `struct parameter`)
-  - [ ] Problem (wrap `struct problem`)
-- [ ] Abstraction for classifier: encapsulate `model`
