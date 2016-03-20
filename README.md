@@ -1,4 +1,4 @@
-LIBLINEAR for Go
+LinearGo: LIBLINEAR for Go
 ==========
 
 [![Build Status](https://travis-ci.org/lazywei/liblinear.svg?branch=master)](https://travis-ci.org/lazywei/liblinear)
@@ -39,7 +39,7 @@ brew install go
 After liblinear installation, just `go get` this package
 
 ```
-go get github.com/lazywei/liblinear
+go get github.com/lazywei/lineargo
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ go get github.com/lazywei/liblinear
 *The package is based on [mat64](https://godoc.org/github.com/gonum/matrix/mat64).*
 
 ```go
-import linear "github.com/lazywei/liblinear"
+import linear "github.com/lazywei/lineargo"
 
 // ReadLibsvm(filepath string, oneBased bool) (X, y *mat64.Dense)
 X, y := linear.ReadLibsvm("heart_scale", true)

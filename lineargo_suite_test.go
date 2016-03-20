@@ -1,4 +1,4 @@
-package liblinear_test
+package lineargo_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestLiblinear(t *testing.T) {
+func TestLineargo(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Liblinear Suite")
+	RunSpecs(t, "Lineargo Suite")
 }

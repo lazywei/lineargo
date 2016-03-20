@@ -1,15 +1,15 @@
-package liblinear_test
+package lineargo_test
 
 import (
 	"os"
 
-	. "github.com/lazywei/liblinear"
+	. "github.com/lazywei/lineargo"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Liblinear", func() {
+var _ = Describe("LinearGo", func() {
 	Describe("Train and Predict", func() {
 		It("should train and predict close result", func() {
 			X, y := ReadLibsvm("test_fixture/heart_scale", true)

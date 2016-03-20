@@ -1,4 +1,4 @@
-package liblinear
+package lineargo
 
 import (
 	. "github.com/onsi/ginkgo"
