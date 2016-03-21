@@ -2,6 +2,7 @@ LinearGo: LIBLINEAR for Go
 ==========
 
 [![Build Status](https://travis-ci.org/lazywei/lineargo.svg?branch=master)](https://travis-ci.org/lazywei/lineargo)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lazywei/lineargo)](https://goreportcard.com/report/github.com/lazywei/lineargo)
 
 This is a Golang wrapper for [LIBLINEAR (C.-J. Lin et al.)](http://ntucsu.csie.ntu.edu.tw/~cjlin/liblinear/) ([GitHub](https://github.com/cjlin1/liblinear)).
 Note that the interface of this package might be slightly different from

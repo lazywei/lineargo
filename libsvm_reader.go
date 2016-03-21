@@ -58,7 +58,7 @@ func ReadLibsvm(filepath string, oneBased bool) (X, y *mat64.Dense) {
 			nFeatures = nFeatures - 1
 		}
 
-		nSamples += 1
+		nSamples++
 	}
 
 	X = mat64.NewDense(nSamples, nFeatures, nil)

@@ -15,6 +15,8 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
+// Model contains a pointer to C's struct model (i.e., `*C.struct_model`). It is
+// returned after training and used for predicting.
 type Model struct {
 	// struct model
 	// {
